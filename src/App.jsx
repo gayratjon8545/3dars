@@ -51,10 +51,8 @@ function App() {
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
-      if (user.displayName && user.photoURL) {
-        dispatch(login(user));
-        dispatch(isAuthChange());
-      }
+      dispatch(login(user));
+      dispatch(isAuthChange());
     });
   });
   return <>{isAuthReady && <RouterProvider router={routes} />}</>;

@@ -12,6 +12,7 @@ import MainLayout from "./layout/MainLayout";
 // loaders
 import { action as LoginAction } from "./pages/Login";
 import { action as RegisterAction } from "./pages/Register";
+import { action as HomeAction } from "./pages/Home";
 import { ProtectedRoutes } from "./components";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
@@ -20,8 +21,8 @@ import { auth } from "./firebase/firebaseConfig";
 import { isAuthChange, login } from "./app/userSlice";
 function App() {
   const { user, isAuthReady } = useSelector((state) => state.user);
-
   const dispatch = useDispatch();
+
   const routes = createBrowserRouter([
     {
       path: "/",
@@ -34,6 +35,7 @@ function App() {
         {
           index: true,
           element: <Home />,
+          action: HomeAction,
         },
       ],
     },

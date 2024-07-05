@@ -9,6 +9,10 @@ import { FormInput } from "../components";
 import { useLogin } from "../hooks/useLogin";
 import { useEffect, useState } from "react";
 
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "../firebase/firebaseConfig";
+import toast from "react-hot-toast";
+
 export const action = async ({ request }) => {
   let formData = await request.formData();
   let email = formData.get("email");
@@ -17,6 +21,7 @@ export const action = async ({ request }) => {
 };
 
 function Login() {
+  const [forgetPassword, setForgetPassword] = useState(true);
   const userData = useActionData();
   const { signInWithEmail, isPending } = useLogin();
 
@@ -27,7 +32,7 @@ function Login() {
 
   useEffect(() => {
     if (userData) {
-      if (userData.email.trim() && userData.password.trim()) {
+      if (userData.email.trim() && userData.password?.trim()) {
         signInWithEmail(userData.email, userData.password);
       }
       if (
@@ -39,13 +44,26 @@ function Login() {
       ) {
       }
       if (
-        !userData.password.trim(
+        !userData.password?.trim(
           setErros((prev) => {
             return { ...prev, password: "input-error" };
           })
         )
       ) {
       }
+    }
+
+    if (!forgetPassword && userData) {
+      sendPasswordResetEmail(auth, userData.email.trim())
+        .then(() => {
+          toast.success("Send Link");
+          setForgetPassword(!forgetPassword);
+        })
+        .catch((error) => {
+          const errorMessage = error.message;
+          toast.error(errorMessage);
+          // ..
+        });
     }
   }, [userData]);
   return (
@@ -64,16 +82,21 @@ function Login() {
            "
             status={errors.email}
           />
-          <FormInput
-            type="password"
-            name="password"
-            labelText="password "
-            status={errors.password}
-          />
+          {forgetPassword && (
+            <FormInput
+              type="password"
+              name="password"
+              labelText="password "
+              status={errors.password}
+            />
+          )}
 
           <div className="w-full">
             {!isPending && (
-              <button className="btn btn-primary btn-block">Login</button>
+              <button className="btn btn-primary btn-block">
+                {" "}
+                {forgetPassword ? "Login" : "Send Link"}
+              </button>
             )}
             {isPending && (
               <button disabled className="btn btn-primary btn-block">
@@ -86,6 +109,18 @@ function Login() {
             <Link className="link link-primary" to="/register">
               Register
             </Link>
+          </div>
+          <div className="text-center">
+            <p>
+              Forgot password ?{" "}
+              <button
+                type="btn"
+                className="btn  btn-sm"
+                onClick={() => setForgetPassword(!forgetPassword)}
+              >
+                change password
+              </button>
+            </p>
           </div>
         </Form>
       </div>
